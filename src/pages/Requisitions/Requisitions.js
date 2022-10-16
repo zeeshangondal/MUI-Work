@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import EmployeeForm from "./EmployeeForm";
+import RequisitionForm from "./RequisitionForm";
 import PageHeader from "../../components/PageHeader";
 import PeopleOutlineTwoToneIcon from '@material-ui/icons/PeopleOutlineTwoTone';
 import { Paper, makeStyles, TableBody, TableRow, TableCell, Toolbar, InputAdornment } from '@material-ui/core';
@@ -7,7 +7,6 @@ import useTable from "../../components/useTable";
 import * as employeeService from "../../services/employeeService";
 import Controls from "../../components/controls/Controls";
 import { EditOutlined, Search } from "@material-ui/icons";
-import useTabel from '../../components/controls/useTabel';
 import AddIcon from '@material-ui/icons/Add';
 import Popup from '../../components/Popup';
 import CloseIcon from '@material-ui/icons/Close';
@@ -41,7 +40,7 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-export default function Employees() {
+export default function Requisitions() {
   const classes = useStyles()
   const [records, setRecords] = React.useState(employeeService.getAllEmployees())
   const [filterFn, setFilterFn] = useState({ fn: items => { return items; } })
@@ -56,7 +55,7 @@ export default function Employees() {
     TblHead,
     TblPagination,
     recordsAfterPagingAndSorting
-  } = useTabel(records, headCells, filterFn)
+  } = useTable(records, headCells, filterFn)
 
 
 
@@ -107,8 +106,13 @@ export default function Employees() {
   }
   return (
     <div>
+      <PageHeader
+                title="Add Requisition"
+                subTitle="Store Requisition Form design with validation"
+                icon={<PeopleOutlineTwoToneIcon fontSize="large" />}
+      />
       <Paper className={classes.pageContent}>
-        {/* <EmployeeForm /> */}
+        <RequisitionForm />
         <Toolbar>
           <Controls.Input
             className={classes.searchInput}
@@ -169,7 +173,7 @@ export default function Employees() {
         title="Employee Form"
         setOpenPopup={setOpenPopup}
       >
-        <EmployeeForm addOrEdit={addOrEdit} recordForEdit={recordForEdit} />
+        <RequisitionForm addOrEdit={addOrEdit} recordForEdit={recordForEdit} />
       </Popup>
       <Notification
         notify={notify}

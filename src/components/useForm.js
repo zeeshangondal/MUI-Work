@@ -1,12 +1,11 @@
 import React, { useState } from 'react'
 import { makeStyles } from "@material-ui/core";
 
-export function useForm(initialFValues,validateOnChange,validate) {
+export function useForm(initialFValues, validateOnChange = false, validate) {
 
 
     const [values, setValues] = useState(initialFValues);
     const [errors, setErrors] = useState({});
-
 
     const handleInputChange = e => {
         const { name, value } = e.target
@@ -14,15 +13,15 @@ export function useForm(initialFValues,validateOnChange,validate) {
             ...values,
             [name]: value
         })
-
-        if(validateOnChange){
-            validate({[name]:value})
-        }
+        if (validateOnChange)
+            validate({ [name]: value })
     }
-    const resetForm=()=>{
-        setValues(initialFValues)
+
+    const resetForm = () => {
+        setValues(initialFValues);
         setErrors({})
     }
+
 
     return {
         values,
@@ -30,7 +29,8 @@ export function useForm(initialFValues,validateOnChange,validate) {
         errors,
         setErrors,
         handleInputChange,
-        resetForm     
+        resetForm
+
     }
 }
 
@@ -38,13 +38,14 @@ export function useForm(initialFValues,validateOnChange,validate) {
 const useStyles = makeStyles(theme => ({
     root: {
         '& .MuiFormControl-root': {
-            width: '80%',
+            width: '45%',
             margin: theme.spacing(1)
         }
     }
 }))
 
 export function Form(props) {
+
     const classes = useStyles();
     const { children, ...other } = props;
     return (

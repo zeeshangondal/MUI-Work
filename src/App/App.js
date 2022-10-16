@@ -4,7 +4,7 @@ import { makeStyles, CssBaseline, createMuiTheme, ThemeProvider } from '@materia
 import Header from "../components/Header";
 import PageHeader from '../components/PageHeader';
 
-import Employees from "../pages/Employees/Employees";
+import Requisitions from "../pages/Requisitions/Requisitions";
 
 const theme = createMuiTheme({
   palette: {
@@ -48,9 +48,8 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <div className={classes.appMain}>
-        <Header />
         
-        <Employees />
+        <Requisitions />
       </div>
       <CssBaseline />
     </ThemeProvider>
