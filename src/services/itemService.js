@@ -33,7 +33,15 @@ export let items = [
         categoryId:1,
         packagingId:0,
         quantity:30,
+    },
+    {
+        id:6,
+        name:"Papers",
+        categoryId:1,
+        packagingId:0,
+        quantity:23,
     }
+
 ]
 
 export const categoryOptions = [

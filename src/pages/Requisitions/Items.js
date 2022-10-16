@@ -15,6 +15,7 @@ import AddIcon from '@material-ui/icons/Add';
 
 import SendOutlinedIcon from '@material-ui/icons/SendOutlined';
 import Popup from '../../components/Popup';
+import Notification from '../../components/Notification';
 
 
 
@@ -41,6 +42,15 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
+const useStyles2 = makeStyles(theme => ({
+    root: {
+        '& .MuiFormControl-root': {
+            width: '80%',
+            margin: theme.spacing(1)
+        }
+    }
+}))
+
 const allItemsHeadCells = [
     { id: 'name', label: 'Name' },
     { id: 'category', label: 'Category' },
@@ -51,18 +61,16 @@ const allItemsHeadCells = [
 
 export default function Items(props) {
     const classes = useStyles()
+    const formClasses=useStyles2()
     const [allItems, setAllItems] = React.useState(itemService.getItems())
     const [filterFn, setFilterFn] = useState({ fn: items => { return items; } })
-
-
-
-
     const validate = (fieldValues = values) => {
         let temp = { ...errors }
-        temp.quantity = fieldValues.quantity ? "" : "Quantity can not be negative."
+        temp.quantity = parseInt(fieldValues.quantity) >= 1 ? "" : "Quantity must b greater than 0."
         setErrors({
             ...temp
         })
+        console.log(errors)
         return Object.values(temp).every(x => x == "")
     }
     const {
@@ -72,7 +80,7 @@ export default function Items(props) {
         errors,
         setErrors,
         resetForm
-    } = useForm(initialFValues, true, validate);
+    } = useForm({ quantity: 1 }, true, validate);
 
 
     const {
@@ -96,16 +104,19 @@ export default function Items(props) {
     }
 
 
-    // const handleSubmit = (e) => {
-    //     e.preventDefault()
-    //     if (validate()) {
-    //         addOrEdit(values, resetForm)
-    //     }
-    // }
+    const handleItemSubmit = (e) => {
+        e.preventDefault()
+        if (validate()) {
+            setOpenItemPopup(false)
+            props.addItemToRequisition(values)
+        }
+    }
 
-    const [addingItem, setAddingItem] = React.useState({})
     const [openItemPopup, setOpenItemPopup] = useState(false)
+
+
     
+
     return (
         <>
 
@@ -114,24 +125,29 @@ export default function Items(props) {
                 title="Add Item to Requisition"
                 setOpenPopup={setOpenItemPopup}
             >
-                <Form>
+                <Form onSubmit={handleItemSubmit} className={formClasses.root}>
                     <Grid container>
                         <Grid item xs={12}>
                             <Controls.Input
                                 label='Item'
-                                value={addingItem.name}
-                                disabled={true}
+                                value={values.name}
                             />
                             <Controls.Input
                                 label='Category'
-                                value={addingItem.category}
-                                disabled={true}
+                                value={values.category}
                             />
                             <Controls.Input
                                 label='Quantity'
+                                name='quantity'
                                 type='number'
-                                value={addingItem.quantity}
-                                onChange={()=>{}}
+                                value={values.quantity}
+                                onChange={handleInputChange}
+                                error={errors.quantity}
+                            />
+                            <br/>
+                            <Controls.Button
+                                type="submit"
+                                text="Submit" 
                             />
                         </Grid>
                     </Grid>
@@ -139,14 +155,6 @@ export default function Items(props) {
                 </Form>
 
             </Popup>
-
-            <br />
-            <br /><br /><br />
-
-
-
-
-            <Form >
                 <Toolbar>
                     <Controls.Input
                         className={classes.searchInput}
@@ -157,12 +165,6 @@ export default function Items(props) {
                             </InputAdornment>)
                         }}
                         onChange={handleSearch}
-                    />
-                    <Controls.Button
-                        className={classes.newButton}
-                        text="Add New"
-                        variant="outlined"
-                        startIcon={<AddIcon />}
                     />
                 </Toolbar>
 
@@ -176,39 +178,16 @@ export default function Items(props) {
                                     <TableCell>{item.category}</TableCell>
                                     <TableCell>{item.quantity}</TableCell>
                                     <TableCell>
-                                        <Controls.ActionButton color='primary' onClick={() => { setAddingItem(item); setOpenItemPopup(true) }}>
+                                        <Controls.ActionButton color='primary' onClick={() => { setValues({ ...item ,quantity:1}); setOpenItemPopup(true) }}>
                                             <SendOutlinedIcon />
                                         </Controls.ActionButton>
                                     </TableCell>
-                                    {/* <TableCell>
-                                    <Controls.ActionButton color='primary' onClick={() => openInPopup(item)}>
-                                        <EditOutlined />
-                                    </Controls.ActionButton>
-
-                                    <Controls.ActionButton color='secondary'
-                                        onClick={() => {
-                                            setConfirmDialog({
-                                                isOpen: true,
-                                                title: 'Are you sure to delete this record?',
-                                                subTitle: "You can't undo this operation",
-                                                onConfirm: () => { onDelete(item.id) }
-                                            })
-                                        }}
-                                    >
-                                        <CloseIcon />
-                                    </Controls.ActionButton>
-                                </TableCell> */}
                                 </TableRow>
                             ))
                         }
                     </TableBody>
                 </TblContainer>
                 <TblPagination />
-                <br />
-                <br />
-                <br />
-
-            </Form>
         </>
     )
 }

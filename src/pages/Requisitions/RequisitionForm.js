@@ -10,11 +10,15 @@ import { Paper, makeStyles, TableBody, TableRow, TableCell, Toolbar, InputAdornm
 
 
 import Controls from "../../components/controls/Controls";
-import { Search } from "@material-ui/icons";
+import { EditOutlined, Search } from "@material-ui/icons";
 import AddIcon from '@material-ui/icons/Add';
+import CloseIcon from '@material-ui/icons/Close';
 
 import SendOutlinedIcon from '@material-ui/icons/SendOutlined';
 import Items from './Items';
+import Notification from '../../components/Notification';
+import Popup from '../../components/Popup';
+import ConfirmDialog from '../../components/ConfirmDialog';
 
 
 
@@ -41,7 +45,7 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
-const allItemsHeadCells = [
+const addedItemsHeadCells = [
     { id: 'name', label: 'Name' },
     { id: 'category', label: 'Category' },
     { id: 'quantity', label: 'Available Quantity', disableSorting: true },
@@ -53,9 +57,11 @@ export default function RequisitionForm(props) {
     const classes = useStyles()
 
     const { addOrEdit, recordForEdit } = props;
-    const [allItems, setAllItems] = React.useState(itemService.getItems())
+    const [addedItems, setAddedItems] = React.useState(itemService.getItems())
     const [filterFn, setFilterFn] = useState({ fn: items => { return items; } })
-
+    const [notify, setNotify] = useState({ isOpen: false, message: '', type: '' })
+    const [openPopup, setOpenPopup] = useState(false)
+    const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, title: '', subTitle: '' })
 
     React.useEffect(() => {
         if (recordForEdit != null) {
@@ -100,7 +106,6 @@ export default function RequisitionForm(props) {
         setErrors,
         resetForm
     } = useForm(initialFValues, true, validate);
-    console.log(values)
 
 
     const {
@@ -108,9 +113,40 @@ export default function RequisitionForm(props) {
         TblHead,
         TblPagination,
         recordsAfterPagingAndSorting
-    } = useTable(allItems, allItemsHeadCells, filterFn)
+    } = useTable(addedItems, addedItemsHeadCells, filterFn)
+
+    const addItemToRequisition = (item) => {
+        setAddedItems([
+            ...addedItems,
+            item
+        ])
+        setNotify({
+            isOpen: true,
+            message: `${item.quantity} ${item.name} Added Successfully`,
+            type: 'success'
+        })
+    }
+    const onRemoveItemFromRequisition = item => {
+        setConfirmDialog({
+            ...confirmDialog,
+            isOpen: false
+        })
+        setAddedItems(addedItems.filter(x => x.id != item.id))
+
+        setNotify({
+            isOpen: true,
+            message: `${item.quantity} ${item.name} Removed Successfully`,
+            type: 'error'
+        })
+    }
 
 
+    const handleSubmit = (e) => {
+        e.preventDefault()
+        if (validate()) {
+            addOrEdit(values, resetForm)
+        }
+    }
     const handleSearch = e => {
         let target = e.target;
         setFilterFn({
@@ -124,20 +160,9 @@ export default function RequisitionForm(props) {
     }
 
 
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        if (validate()) {
-            addOrEdit(values, resetForm)
-        }
-    }
-
     return (
         <>
-        <Items />
-        <br />
-                <br />
-                <br />
-                <Form>
+            <Form>
                 <Grid container>
                     <Grid item xs={12}>
                         <Controls.Input
@@ -163,17 +188,82 @@ export default function RequisitionForm(props) {
                             options={employeeService.getDepartmentCollection()}
                             error={errors.departmentId}
                         />
-
                         <Controls.DatePicker
                             name="requestedDate"
                             label="Date"
                             value={values.requestedDate}
                             onChange={handleInputChange}
                         />
+
                     </Grid>
                 </Grid>
+                <br />
 
-            //Tabel for items
+                <Popup
+                    openPopup={openPopup}
+                    title="Add Items to Requisition"
+                    setOpenPopup={setOpenPopup}
+                >
+                    <Items
+                        addItemToRequisition={addItemToRequisition}
+                    />
+                </Popup>
+                <Toolbar>
+                    <Controls.Input
+                        className={classes.searchInput}
+                        label="Search"
+                        InputProps={{
+                            startAdornment: (<InputAdornment position="start">
+                                <Search />
+                            </InputAdornment>)
+                        }}
+                        onChange={handleSearch}
+                    />
+                    <Controls.Button
+                        className={classes.newButton}
+                        text="Add Items"
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={() => { setOpenPopup(true) }}
+                    />
+                </Toolbar>
+                <TblContainer>
+                    <TblHead />
+                    <TableBody>
+                        {
+                            recordsAfterPagingAndSorting().map((item) => {
+                                console.log(item,"added")
+                                return (
+                                    <TableRow key={item.id}>
+                                        <TableCell>{item.name}</TableCell>
+                                        <TableCell>{item.category}</TableCell>
+                                        <TableCell>{item.quantity}</TableCell>
+                                        <TableCell>
+                                            <Controls.ActionButton color='primary' >
+                                                <EditOutlined />
+                                            </Controls.ActionButton>
+
+                                            <Controls.ActionButton color='secondary'
+                                                onClick={() => {
+                                                    console.log("clicked")
+                                                    setConfirmDialog({
+                                                        isOpen: true,
+                                                        title: 'Are you sure to delete this item?',
+                                                        subTitle: "You can't undo this operation",
+                                                        onConfirm: () => { onRemoveItemFromRequisition(item) }
+                                                    })
+                                                }}
+                                            >
+                                                <CloseIcon />
+                                            </Controls.ActionButton>
+                                        </TableCell>
+                                    </TableRow>
+                                )
+                            })
+                        }
+                    </TableBody>
+                </TblContainer>
+                <TblPagination />
 
                 <Grid container>
                     <Grid item xs={12}>
@@ -222,8 +312,11 @@ export default function RequisitionForm(props) {
                         />
                     </Grid>
                 </Grid>
-
             </Form>
+            <Notification
+                notify={notify}
+                setNotify={setNotify}
+            />
         </>
     )
 }
