@@ -116,6 +116,15 @@ export default function RequisitionForm(props) {
     } = useTable(addedItems, addedItemsHeadCells, filterFn)
 
     const addItemToRequisition = (item) => {
+        if(addedItems.find((it)=>it.id == item.id)){
+            setNotify({
+                isOpen: true,
+                message: `${item.name} already been added `,
+                type: 'error'
+            })    
+            return
+        }
+        
         setAddedItems([
             ...addedItems,
             item
