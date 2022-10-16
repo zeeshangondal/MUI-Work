@@ -57,7 +57,7 @@ export default function RequisitionForm(props) {
     const classes = useStyles()
 
     const { addOrEdit, recordForEdit } = props;
-    const [addedItems, setAddedItems] = React.useState(itemService.getItems())
+    const [addedItems, setAddedItems] = React.useState([])
     const [filterFn, setFilterFn] = useState({ fn: items => { return items; } })
     const [notify, setNotify] = useState({ isOpen: false, message: '', type: '' })
     const [openPopup, setOpenPopup] = useState(false)
@@ -232,7 +232,6 @@ export default function RequisitionForm(props) {
                     <TableBody>
                         {
                             recordsAfterPagingAndSorting().map((item) => {
-                                console.log(item,"added")
                                 return (
                                     <TableRow key={item.id}>
                                         <TableCell>{item.name}</TableCell>
@@ -264,7 +263,14 @@ export default function RequisitionForm(props) {
                     </TableBody>
                 </TblContainer>
                 <TblPagination />
-
+                <Notification
+                    notify={notify}
+                    setNotify={setNotify}
+                />
+                <ConfirmDialog
+                    confirmDialog={confirmDialog}
+                    setConfirmDialog={setConfirmDialog}
+                />
                 <Grid container>
                     <Grid item xs={12}>
                         <Controls.Input
