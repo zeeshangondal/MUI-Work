@@ -90,15 +90,15 @@ export default function Requisitions() {
   const onDelete = (id) => {
     setConfirmDialog({
       ...confirmDialog,
-      isOpen:false
+      isOpen: false
     })
     employeeService.deleteEmployee(id)
-      setRecords(employeeService.getAllEmployees())
-      setNotify({
-        isOpen: true,
-        message: 'Deleted successfully',
-        type: 'error'
-      })
+    setRecords(employeeService.getAllEmployees())
+    setNotify({
+      isOpen: true,
+      message: 'Deleted successfully',
+      type: 'error'
+    })
   }
   const openInPopup = (item) => {
     setRecordForEdit(item)
@@ -107,13 +107,13 @@ export default function Requisitions() {
   return (
     <div>
       <PageHeader
-                title="Add Requisition"
-                subTitle="Store Requisition Form design with validation"
-                icon={<PeopleOutlineTwoToneIcon fontSize="large" />}
+        title="Add Requisition"
+        subTitle="Store Requisition Form design with validation"
+        icon={<PeopleOutlineTwoToneIcon fontSize="large" />}
       />
       <Paper className={classes.pageContent}>
         <RequisitionForm />
-        <Toolbar>
+        {/* <Toolbar>
           <Controls.Input
             className={classes.searchInput}
             label="Search"
@@ -166,9 +166,9 @@ export default function Requisitions() {
             }
           </TableBody>
         </TblContainer>
-        <TblPagination />
+        <TblPagination /> */}
       </Paper>
-      <Popup
+      {/* <Popup
         openPopup={openPopup}
         title="Employee Form"
         setOpenPopup={setOpenPopup}
@@ -182,7 +182,7 @@ export default function Requisitions() {
       <ConfirmDialog
         confirmDialog={confirmDialog}
         setConfirmDialog={setConfirmDialog}
-      />
+      /> */}
     </div>
   )
 }

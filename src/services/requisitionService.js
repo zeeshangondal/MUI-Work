@@ -4,10 +4,10 @@ const KEYS = {
 }
 
 export const getDepartmentCollection = () => ([
-    { id: '1', title: 'Development' },
-    { id: '2', title: 'Marketing' },
-    { id: '3', title: 'Accounting' },
-    { id: '4', title: 'HR' },
+    { id: '0', title: 'Development' },
+    { id: '1', title: 'Marketing' },
+    { id: '2', title: 'Accounting' },
+    { id: '3', title: 'HR' },
 ])
 
 export function insertRequisition(data) {
@@ -46,6 +46,6 @@ export function getAllRequisitions() {
     let departments = getDepartmentCollection();
     return requisitionForms.map(x => ({
         ...x,
-        department: departments[x.departmentId - 1].title
+        department: departments[x.departmentId].title
     }))
 }

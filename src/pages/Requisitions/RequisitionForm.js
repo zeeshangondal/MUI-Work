@@ -13,6 +13,8 @@ import Controls from "../../components/controls/Controls";
 import { Search } from "@material-ui/icons";
 import AddIcon from '@material-ui/icons/Add';
 
+import SendOutlinedIcon from '@material-ui/icons/SendOutlined';
+import Items from './Items';
 
 
 
@@ -40,21 +42,20 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const allItemsHeadCells = [
-    { id: 'fullName', label: 'Employee Name' },
-    { id: 'email', label: 'Email Address (Personal)' },
-    { id: 'mobile', label: 'Mobile Number' },
-    { id: 'department', label: 'Department', disableSorting: true },
-    { id: 'actions', label: 'Actions', disableSorting: true },
-  ]
+    { id: 'name', label: 'Name' },
+    { id: 'category', label: 'Category' },
+    { id: 'quantity', label: 'Available Quantity', disableSorting: true },
+    { id: 'actions', label: 'Actions', disableSorting: true }
+]
 
 
 export default function RequisitionForm(props) {
     const classes = useStyles()
 
     const { addOrEdit, recordForEdit } = props;
-    const [items, setItems] = React.useState(requisitionService.getAllRequisitions())
+    const [allItems, setAllItems] = React.useState(itemService.getItems())
     const [filterFn, setFilterFn] = useState({ fn: items => { return items; } })
-  
+
 
     React.useEffect(() => {
         if (recordForEdit != null) {
@@ -107,8 +108,20 @@ export default function RequisitionForm(props) {
         TblHead,
         TblPagination,
         recordsAfterPagingAndSorting
-    } = useTable(items,allItemsHeadCells,filterFn)
+    } = useTable(allItems, allItemsHeadCells, filterFn)
 
+
+    const handleSearch = e => {
+        let target = e.target;
+        setFilterFn({
+            fn: items => {
+                if (target.value == "")
+                    return items;
+                else
+                    return items.filter(x => x.name.toLowerCase().includes(target.value.toLowerCase()))
+            }
+        })
+    }
 
 
     const handleSubmit = (e) => {
@@ -119,154 +132,99 @@ export default function RequisitionForm(props) {
     }
 
     return (
-        <Form onSubmit={handleSubmit}>
-            <Toolbar>
-                <Controls.Input
-                    className={classes.searchInput}
-                    label="Search"
-                    InputProps={{
-                        startAdornment: (<InputAdornment position="start">
-                            <Search />
-                        </InputAdornment>)
-                    }}
-                />
-                <Controls.Button
-                    className={classes.newButton}
-                    text="Add New"
-                    variant="outlined"
-                    startIcon={<AddIcon />}
-                />
-            </Toolbar>
+        <>
+        <Items />
+        <br />
+                <br />
+                <br />
+                <Form>
+                <Grid container>
+                    <Grid item xs={12}>
+                        <Controls.Input
+                            name="name"
+                            label="Name"
+                            value={values.name}
+                            onChange={handleInputChange}
+                            error={errors.name}
+                        />
 
-            <TblContainer>
-                <TblHead />
-                {/* <TableBody>
-                    {
-                        recordsAfterPagingAndSorting().map(item => (
-                            <TableRow key={item.id}>
-                                <TableCell>{item.fullName}</TableCell>
-                                <TableCell>{item.email}</TableCell>
-                                <TableCell>{item.mobile}</TableCell>
-                                <TableCell>{item.department}</TableCell>
-                                <TableCell>
-                                    <Controls.ActionButton color='primary' onClick={() => openInPopup(item)}>
-                                        <EditOutlined />
-                                    </Controls.ActionButton>
+                        <Controls.Input
+                            name="designation"
+                            label="Designation"
+                            value={values.designation}
+                            onChange={handleInputChange}
+                            error={errors.designation}
+                        />
+                        <Controls.Select
+                            name="departmentId"
+                            label="Department"
+                            value={values.departmentId}
+                            onChange={handleInputChange}
+                            options={employeeService.getDepartmentCollection()}
+                            error={errors.departmentId}
+                        />
 
-                                    <Controls.ActionButton color='secondary'
-                                        onClick={() => {
-                                            setConfirmDialog({
-                                                isOpen: true,
-                                                title: 'Are you sure to delete this record?',
-                                                subTitle: "You can't undo this operation",
-                                                onConfirm: () => { onDelete(item.id) }
-                                            })
-                                        }}
-                                    >
-                                        <CloseIcon />
-                                    </Controls.ActionButton>
-                                </TableCell>
-                            </TableRow>
-                        ))
-                    }
-                </TableBody> */}
-            </TblContainer>
-            <TblPagination />
-            <br />
-            <br />
-            <br />
-
-
-
-
-
-
-            <Grid container>
-                <Grid item xs={12}>
-                    <Controls.Input
-                        name="name"
-                        label="Name"
-                        value={values.name}
-                        onChange={handleInputChange}
-                        error={errors.name}
-                    />
-
-                    <Controls.Input
-                        name="designation"
-                        label="Designation"
-                        value={values.designation}
-                        onChange={handleInputChange}
-                        error={errors.designation}
-                    />
-                    <Controls.Select
-                        name="departmentId"
-                        label="Department"
-                        value={values.departmentId}
-                        onChange={handleInputChange}
-                        options={employeeService.getDepartmentCollection()}
-                        error={errors.departmentId}
-                    />
-
-                    <Controls.DatePicker
-                        name="requestedDate"
-                        label="Date"
-                        value={values.requestedDate}
-                        onChange={handleInputChange}
-                    />
+                        <Controls.DatePicker
+                            name="requestedDate"
+                            label="Date"
+                            value={values.requestedDate}
+                            onChange={handleInputChange}
+                        />
+                    </Grid>
                 </Grid>
-            </Grid>
 
             //Tabel for items
 
-            <Grid container>
-                <Grid item xs={12}>
-                    <Controls.Input
-                        name="verifiedByName"
-                        label="Verified By (HoD/ Section Head)"
-                        value={values.verifiedByName}
-                        onChange={handleInputChange}
-                        error={errors.verifiedByName}
-                    />
-                    <Controls.DatePicker
-                        name="verifiedDate"
-                        label="Date"
-                        value={values.verifiedDate}
-                        onChange={handleInputChange}
-                    />
+                <Grid container>
+                    <Grid item xs={12}>
+                        <Controls.Input
+                            name="verifiedByName"
+                            label="Verified By (HoD/ Section Head)"
+                            value={values.verifiedByName}
+                            onChange={handleInputChange}
+                            error={errors.verifiedByName}
+                        />
+                        <Controls.DatePicker
+                            name="verifiedDate"
+                            label="Date"
+                            value={values.verifiedDate}
+                            onChange={handleInputChange}
+                        />
 
-                    <Controls.Input
-                        name="receivedByName"
-                        label="Received By"
-                        value={values.receivedByName}
-                        onChange={handleInputChange}
-                        error={errors.receivedByName}
-                    />
-                    <Controls.DatePicker
-                        name="receivedDate"
-                        label="Date"
-                        value={values.receivedDate}
-                        onChange={handleInputChange}
-                    />
+                        <Controls.Input
+                            name="receivedByName"
+                            label="Received By"
+                            value={values.receivedByName}
+                            onChange={handleInputChange}
+                            error={errors.receivedByName}
+                        />
+                        <Controls.DatePicker
+                            name="receivedDate"
+                            label="Date"
+                            value={values.receivedDate}
+                            onChange={handleInputChange}
+                        />
 
 
-                    <Controls.Input
-                        name="issuedByName"
-                        label="Issued By (Store in charge)"
-                        value={values.issuedByName}
-                        onChange={handleInputChange}
-                        error={errors.issuedByName}
+                        <Controls.Input
+                            name="issuedByName"
+                            label="Issued By (Store in charge)"
+                            value={values.issuedByName}
+                            onChange={handleInputChange}
+                            error={errors.issuedByName}
 
-                    />
-                    <Controls.DatePicker
-                        name="issuedDate"
-                        label="Date"
-                        value={values.issuedDate}
-                        onChange={handleInputChange}
-                    />
+                        />
+                        <Controls.DatePicker
+                            name="issuedDate"
+                            label="Date"
+                            value={values.issuedDate}
+                            onChange={handleInputChange}
+                        />
+                    </Grid>
                 </Grid>
-            </Grid>
 
-        </Form>
+            </Form>
+        </>
     )
 }
 
