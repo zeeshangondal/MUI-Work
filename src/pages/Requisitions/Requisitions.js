@@ -4,7 +4,9 @@ import PageHeader from "../../components/PageHeader";
 import PeopleOutlineTwoToneIcon from '@material-ui/icons/PeopleOutlineTwoTone';
 import { Paper, makeStyles, TableBody, TableRow, TableCell, Toolbar, InputAdornment } from '@material-ui/core';
 import useTable from "../../components/useTable";
-import * as employeeService from "../../services/employeeService";
+import * as requisitionService from "../../services/requisitionService";
+
+
 import Controls from "../../components/controls/Controls";
 import { EditOutlined, Search } from "@material-ui/icons";
 import AddIcon from '@material-ui/icons/Add';
@@ -18,9 +20,8 @@ import ConfirmDialog from '../../components/ConfirmDialog';
 
 
 const headCells = [
-  { id: 'fullName', label: 'Employee Name' },
-  { id: 'email', label: 'Email Address (Personal)' },
-  { id: 'mobile', label: 'Mobile Number' },
+  { id: 'name', label: 'Name' },
+  { id: 'date', label: 'Date' },
   { id: 'department', label: 'Department', disableSorting: true },
   { id: 'actions', label: 'Actions', disableSorting: true },
 
@@ -42,7 +43,7 @@ const useStyles = makeStyles(theme => ({
 
 export default function Requisitions() {
   const classes = useStyles()
-  const [records, setRecords] = React.useState(employeeService.getAllEmployees())
+  const [records, setRecords] = React.useState(requisitionService.getAllRequisitions())
   const [filterFn, setFilterFn] = useState({ fn: items => { return items; } })
   const [openPopup, setOpenPopup] = useState(false)
   const [recordForEdit, setRecordForEdit] = useState(null)
@@ -72,15 +73,15 @@ export default function Requisitions() {
   }
 
 
-  const addOrEdit = (employee, resetForm) => {
-    if (employee.id == '0')
-      employeeService.insertEmployee(employee)
+  const addOrEdit = (requisitionForm, resetForm) => {
+    if (requisitionForm.id == '0')
+      requisitionService.insertRequisition(requisitionForm)
     else
-      employeeService.updateEmployee(employee)
+      requisitionService.updateRequisition(requisitionForm)
     setRecordForEdit(null)
     resetForm()
     setOpenPopup(false)
-    setRecords(employeeService.getAllEmployees())
+    setRecords(requisitionService.getAllRequisitions())
     setNotify({
       isOpen: true,
       message: 'Submitted successfully',
@@ -92,16 +93,16 @@ export default function Requisitions() {
       ...confirmDialog,
       isOpen: false
     })
-    employeeService.deleteEmployee(id)
-    setRecords(employeeService.getAllEmployees())
+    requisitionService.deleteRequisition(id)
+    setRecords(requisitionService.getAllRequisitions())
     setNotify({
       isOpen: true,
       message: 'Deleted successfully',
       type: 'error'
     })
   }
-  const openInPopup = (item) => {
-    setRecordForEdit(item)
+  const openInPopup = (requisitionForm) => {
+    setRecordForEdit(requisitionForm)
     setOpenPopup(true)
   }
   return (
@@ -112,8 +113,8 @@ export default function Requisitions() {
         icon={<PeopleOutlineTwoToneIcon fontSize="large" />}
       />
       <Paper className={classes.pageContent}>
-        <RequisitionForm />
-        {/* <Toolbar>
+        {/* <RequisitionForm /> */}
+        <Toolbar>
           <Controls.Input
             className={classes.searchInput}
             label="Search"
@@ -137,14 +138,13 @@ export default function Requisitions() {
           <TblHead />
           <TableBody>
             {
-              recordsAfterPagingAndSorting().map(item => (
-                <TableRow key={item.id}>
-                  <TableCell>{item.fullName}</TableCell>
-                  <TableCell>{item.email}</TableCell>
-                  <TableCell>{item.mobile}</TableCell>
-                  <TableCell>{item.department}</TableCell>
+              recordsAfterPagingAndSorting().map(requisitionForm => (
+                <TableRow key={requisitionForm.id}>
+                  <TableCell>{requisitionForm.name}</TableCell>
+                  <TableCell>{requisitionForm.requestedDate}</TableCell>
+                  <TableCell>{requisitionForm.department}</TableCell>
                   <TableCell>
-                    <Controls.ActionButton color='primary' onClick={() => openInPopup(item)}>
+                    <Controls.ActionButton color='primary' onClick={() => openInPopup(requisitionForm)}>
                       <EditOutlined />
                     </Controls.ActionButton>
 
@@ -154,7 +154,7 @@ export default function Requisitions() {
                           isOpen: true,
                           title: 'Are you sure to delete this record?',
                           subTitle: "You can't undo this operation",
-                          onConfirm: () => { onDelete(item.id) }
+                          onConfirm: () => { onDelete(requisitionForm.id) }
                         })
                       }}
                     >
@@ -166,9 +166,9 @@ export default function Requisitions() {
             }
           </TableBody>
         </TblContainer>
-        <TblPagination /> */}
+        <TblPagination />
       </Paper>
-      {/* <Popup
+      <Popup
         openPopup={openPopup}
         title="Employee Form"
         setOpenPopup={setOpenPopup}
@@ -182,7 +182,7 @@ export default function Requisitions() {
       <ConfirmDialog
         confirmDialog={confirmDialog}
         setConfirmDialog={setConfirmDialog}
-      /> */}
+      />
     </div>
   )
 }

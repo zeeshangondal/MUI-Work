@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Grid } from '@material-ui/core';
 import { useForm, Form } from '../../components/useForm';
-import * as employeeService from "../../services/employeeService";
 import * as requisitionService from "../../services/requisitionService";
 import * as itemService from "../../services/itemService";
 
@@ -68,6 +67,9 @@ export default function RequisitionForm(props) {
             setValues({
                 ...recordForEdit
             })
+            setAddedItems([
+                ...recordForEdit.items
+            ])
         }
     }, [recordForEdit])
 
@@ -116,15 +118,15 @@ export default function RequisitionForm(props) {
     } = useTable(addedItems, addedItemsHeadCells, filterFn)
 
     const addItemToRequisition = (item) => {
-        if(addedItems.find((it)=>it.id == item.id)){
+        if (addedItems.find((it) => it.id == item.id)) {
             setNotify({
                 isOpen: true,
                 message: `${item.name} already been added `,
                 type: 'error'
-            })    
+            })
             return
         }
-        
+
         setAddedItems([
             ...addedItems,
             item
@@ -153,8 +155,15 @@ export default function RequisitionForm(props) {
     const handleSubmit = (e) => {
         e.preventDefault()
         if (validate()) {
-            addOrEdit(values, resetForm)
+            const requisitionData={...values , items:addedItems}
+            console.log(requisitionData)
+            addOrEdit(requisitionData, resetForm)
         }
+    }
+    
+    const resetRequisistionForm=()=>{
+        resetForm()
+        setAddedItems([])
     }
     const handleSearch = e => {
         let target = e.target;
@@ -194,7 +203,7 @@ export default function RequisitionForm(props) {
                             label="Department"
                             value={values.departmentId}
                             onChange={handleInputChange}
-                            options={employeeService.getDepartmentCollection()}
+                            options={requisitionService.getDepartmentCollection()}
                             error={errors.departmentId}
                         />
                         <Controls.DatePicker
@@ -325,6 +334,17 @@ export default function RequisitionForm(props) {
                             value={values.issuedDate}
                             onChange={handleInputChange}
                         />
+                        <Controls.Button
+                            text="Submit"
+                            variant="contained"
+                            onClick={handleSubmit}
+                        />
+                        <Controls.Button
+                            text="Reset"
+                            variant="contained"
+                            color="secondary"
+                            onClick={resetRequisistionForm}
+                        />
                     </Grid>
                 </Grid>
             </Form>
@@ -339,83 +359,3 @@ export default function RequisitionForm(props) {
 
 
 
-
-
-// <Controls.Input
-// name="fullName"
-// label="Full Name"
-// value={values.fullName}
-// onChange={handleInputChange}
-// error={errors.fullName}
-// />
-// <Controls.Input
-// label="Email"
-// name="email"
-// value={values.email}
-// onChange={handleInputChange}
-// error={errors.email}
-// />
-// <Controls.Input
-// label="Mobile"
-// name="mobile"
-// value={values.mobile}
-// onChange={handleInputChange}
-// error={errors.mobile}
-// />
-// <Controls.Input
-// label="City"
-// name="city"
-// value={values.city}
-// onChange={handleInputChange}
-// />
-
-
-
-
-
-
-
-
-
-
-
-// <Grid item xs={6}>
-// <Controls.RadioGroup
-//     name="gender"
-//     label="Gender"
-//     value={values.gender}
-//     onChange={handleInputChange}
-//     items={genderItems}
-// />
-// <Controls.Select
-//     name="departmentId"
-//     label="Department"
-//     value={values.departmentId}
-//     onChange={handleInputChange}
-//     options={employeeService.getDepartmentCollection()}
-//     error={errors.departmentId}
-// />
-// <Controls.DatePicker
-//     name="hireDate"
-//     label="Hire Date"
-//     value={values.hireDate}
-//     onChange={handleInputChange}
-// />
-// <Controls.Checkbox
-//     name="isPermanent"
-//     label="Permanent Employee"
-//     value={values.isPermanent}
-//     onChange={handleInputChange}
-// />
-
-// <div>
-//     <Controls.Button
-//         type="submit"
-//         text="Submit" />
-//     <Controls.Button
-//         text="Reset"
-//         color="default"
-//         onClick={resetForm}
-//     />
-// </div>
-// </Grid>

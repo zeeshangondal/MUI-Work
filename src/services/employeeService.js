@@ -44,8 +44,9 @@ export function getAllEmployees() {
     let employees = JSON.parse(localStorage.getItem(KEYS.employees));
     //map departmentID to department title
     let departments = getDepartmentCollection();
+    console.log(employees)
     return employees.map(x => ({
         ...x,
-        department: departments[x.departmentId].title
+//        department: departments[x.departmentId].title
     }))
 }
